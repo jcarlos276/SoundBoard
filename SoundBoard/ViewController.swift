@@ -43,13 +43,20 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
         let cell = UITableViewCell()
         let sound = sounds[indexPath.row]
         cell.textLabel?.text = sound.name
+        cell.textLabel?.textAlignment = .center
         return cell
     }
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let sound = sounds[indexPath.row]
         do {
-            audioPlayer = try! AVAudioPlayer(data: sound.audio! as Data)
-            audioPlayer?.play()
+            if audioPlayer?.data != (sound.audio! as Data) {
+                audioPlayer = try! AVAudioPlayer(data: sound.audio! as Data)
+            }
+            if !(audioPlayer!.isPlaying) {
+                audioPlayer!.play()
+            } else {
+                audioPlayer!.pause()
+            }
         } catch {}
         tableView.deselectRow(at: indexPath, animated: true)
     }

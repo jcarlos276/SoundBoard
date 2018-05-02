@@ -18,6 +18,7 @@ class SoundViewController: UIViewController {
     var audioRecorder: AVAudioRecorder?
     var audioPlayer: AVAudioPlayer?
     var audioURL: URL?
+    var isPlaying = false
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -29,6 +30,7 @@ class SoundViewController: UIViewController {
         setupRecorder()
         playButton.isEnabled = false
         addButton.isEnabled = false
+        nameTextField.delegate = self
     }
     
     func setupRecorder() {
@@ -69,7 +71,6 @@ class SoundViewController: UIViewController {
             //Cambiar el texto del botón grabar
             recordButton.setTitle("Record", for: .normal)
             playButton.isEnabled = true
-            addButton.isEnabled = true
         } else {
             //Empezar a grabar
             audioRecorder?.record()
@@ -80,8 +81,17 @@ class SoundViewController: UIViewController {
     
     @IBAction func playTapped(_ sender: UIButton) {
         do {
-            try audioPlayer = AVAudioPlayer(contentsOf: audioURL!)
-            audioPlayer!.play()
+            if audioPlayer == nil {
+                try audioPlayer = AVAudioPlayer(contentsOf: audioURL!)
+                audioPlayer?.delegate = self
+            }
+            if !(audioPlayer!.isPlaying) {
+                audioPlayer!.play()
+                playButton.setTitle("Pause", for: .normal)
+            } else {
+                audioPlayer!.pause()
+                playButton.setTitle("Play", for: .normal)
+            }
         } catch {}
     }
     
@@ -94,4 +104,20 @@ class SoundViewController: UIViewController {
         navigationController?.popViewController(animated: true)
     }
 
+}
+
+extension SoundViewController: AVAudioPlayerDelegate {
+    func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
+        playButton.setTitle("Play", for: .normal)
+    }
+}
+
+extension SoundViewController: UITextFieldDelegate {
+    func textFieldDidEndEditing(_ textField: UITextField) {
+        if textField.text! != "" {
+            addButton.isEnabled = true
+        } else {
+            addButton.isEnabled = false
+        }
+    }
 }
